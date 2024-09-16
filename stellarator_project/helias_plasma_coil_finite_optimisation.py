@@ -120,9 +120,7 @@ def h5_to_fourier_file_format(h5_filename, output_filename):
         num_coils = len(coils_data)
         full_data = np.zeros((max_order + 1, 6 * num_coils))
         for ic, fourier_coeffs in enumerate(coils_data):
-            full_data[: fourier_coeffs.shape[0], 6 * ic : 6 * (ic + 1)] = (
-                fourier_coeffs
-            )
+            full_data[: fourier_coeffs.shape[0], 6 * ic : 6 * (ic + 1)] = fourier_coeffs
 
         np.savetxt(output_filename, full_data, delimiter=",")
 
@@ -205,12 +203,14 @@ for i, base_curve in enumerate(base_curves):
         rotation_order=rot_order,
     )
     coil_filament_map[coil_name] = filaments
-base_curves_finite_build = functools.reduce(operator.iadd, coil_filament_map.values(), [])
-base_currents_finite_build = functools.reduce(operator.iadd, [[c] * nfil for c in base_currents], [])
-curves_fb = apply_symmetries_to_curves(base_curves_finite_build, s.nfp, True)
-currents_fb = apply_symmetries_to_currents(
-    base_currents_finite_build, s.nfp, True
+base_curves_finite_build = functools.reduce(
+    operator.iadd, coil_filament_map.values(), []
 )
+base_currents_finite_build = functools.reduce(
+    operator.iadd, [[c] * nfil for c in base_currents], []
+)
+curves_fb = apply_symmetries_to_curves(base_curves_finite_build, s.nfp, True)
+currents_fb = apply_symmetries_to_currents(base_currents_finite_build, s.nfp, True)
 coils_fb = list(starmap(Coil, zip(curves_fb, currents_fb)))
 bs = BiotSavart(coils_fb)
 bs.set_points(s.gamma().reshape((-1, 3)))
@@ -233,10 +233,7 @@ Jdist = CurveCurveDistance(curves, DIST_MIN)
 JF = (
     Jf
     + LENGTH_PEN
-    * sum(
-        QuadraticPenalty(Jls[i], Jls[i].J(), "max")
-        for i in range(len(base_curves))
-    )
+    * sum(QuadraticPenalty(Jls[i], Jls[i].J(), "max") for i in range(len(base_curves)))
     + DIST_PEN * Jdist
 )
 
