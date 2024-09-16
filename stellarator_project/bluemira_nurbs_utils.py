@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from typing import Any, List
@@ -14,30 +16,30 @@ from scipy.spatial import KDTree
 # A dataclass to hold the NURBS data.
 @dataclass
 class NURBSData:
-    poles: List[List[float]]
+    poles: list[list[float]]
     poles2d: np.ndarray
     num_ctlpts_u: int
     num_ctlpts_v: int
-    knot_vector_u: List[float]
-    knot_vector_v: List[float]
-    internal_knot_vector_u: List[float]
-    internal_knot_vector_v: List[float]
+    knot_vector_u: list[float]
+    knot_vector_v: list[float]
+    internal_knot_vector_u: list[float]
+    internal_knot_vector_v: list[float]
     degree_u: int
     degree_v: int
-    weights: List[float]
-    weights_reshaped: List[List[float]]
-    mults_u: List[int]
-    mults_v: List[int]
+    weights: list[float]
+    weights_reshaped: list[list[float]]
+    mults_u: list[int]
+    mults_v: list[int]
 
 
 @dataclass
 class NURBSCurveData:
-    poles: List[List[float]]
+    poles: list[list[float]]
     degree: int
-    knot_vector: List[float]
-    internal_knot_vector: List[float]
-    weights: List[float]
-    mults: List[int]
+    knot_vector: list[float]
+    internal_knot_vector: list[float]
+    weights: list[float]
+    mults: list[int]
 
 
 def write_nurbs_data_to_json(nurbs_data: NURBSData, file_path: str) -> None:
@@ -47,7 +49,7 @@ def write_nurbs_data_to_json(nurbs_data: NURBSData, file_path: str) -> None:
 
 
 def write_nurbs_curve_data_to_json(
-    nurbs_curve_data: List[NURBSCurveData], file_path: str
+    nurbs_curve_data: list[NURBSCurveData], file_path: str
 ) -> None:
     """Write a list of NURBSCurveData to a JSON file."""
     curves_data_dict = [curve.__dict__ for curve in nurbs_curve_data]
@@ -93,7 +95,7 @@ def make_periodic_knot_vector(num_points: int, degree: int) -> np.ndarray:
     return knot_vector
 
 
-def extract_internal_knots(knot_vector: List[float], degree: int) -> np.ndarray:
+def extract_internal_knots(knot_vector: list[float], degree: int) -> np.ndarray:
     """Extract the internal knot vector from a given knot vector
     (excludes boundary knots).
     """
@@ -104,16 +106,16 @@ def extract_internal_knots(knot_vector: List[float], degree: int) -> np.ndarray:
     return np.array(internal_knots)
 
 
-def reshape_weights(self) -> List[List[float]]:
-    """Reshape weights to a 2D array (list of lists)"""
+def reshape_weights(self) -> list[list[float]]:
+    """Reshape weights to a 2D array (list of lists)."""
     num_rows = self.num_ctlpts_u
     num_cols = self.num_ctlpts_v
     return self.weights.reshape(num_rows, num_cols).tolist()
 
 
 def extract_internal_multiplicities(
-    knot_vector: List[float], degree: int
-) -> List[int]:
+    knot_vector: list[float], degree: int
+) -> list[int]:
     """Extract the internal multiplicities from a given knot vector."""
     internal_knots = extract_internal_knots(knot_vector, degree)
 
@@ -123,11 +125,9 @@ def extract_internal_multiplicities(
     )
 
     # Build the list of multiplicities in the same order as the internal knots
-    internal_multiplicities = [
+    return [
         counts[i] for i in range(len(unique_internal_knots))
     ]
-
-    return internal_multiplicities
 
 
 def refine_multiplicities(mults: np.ndarray, degree: int) -> np.ndarray:
@@ -142,13 +142,11 @@ def refine_multiplicities(mults: np.ndarray, degree: int) -> np.ndarray:
         )
 
     # Retain one instance of the boundary values and the internal values
-    refined_mults = np.concatenate((
+    return np.concatenate((
         [mults[0]],
         mults[boundary_count:-boundary_count],
         [mults[-1]],
     ))
-
-    return refined_mults
 
 
 def setup_nurbs_surface(
@@ -292,12 +290,12 @@ def plot_nurbs_surface(surf: NURBS.Surface) -> None:
                 y=evaluated_points[:, 1],
                 z=evaluated_points[:, 2],
                 mode="markers",
-                marker=dict(size=2, color="blue"),
+                marker={"size": 2, "color": "blue"},
             )
         ]
     )
     fig.update_layout(
-        scene=dict(xaxis_title="X", yaxis_title="Y", zaxis_title="Z"),
+        scene={"xaxis_title": "X", "yaxis_title": "Y", "zaxis_title": "Z"},
         title="NURBS Surface",
     )
     fig.show()
@@ -308,13 +306,12 @@ def reshape_control_points(control_points, num_ctrlpts_u, num_ctrlpts_v):
     :param nurbs_data: NURBSData object containing the control points and dimensions.
     :type nurbs_data: NURBSData
     :return: Reshaped 2D array of control points
-    :rtype: np.ndarray
+    :rtype: np.ndarray.
     """
     # Reshape the control points into a 2D array
-    control_points_2d = np.reshape(
+    return np.reshape(
         control_points, (num_ctrlpts_u, num_ctrlpts_v, 3)
     )
-    return control_points_2d
 
 
 def extract_points_from_simsopt_surface(simsopt_surface: Any) -> np.ndarray:
@@ -323,13 +320,11 @@ def extract_points_from_simsopt_surface(simsopt_surface: Any) -> np.ndarray:
     :param simsopt_surface: Simsopt surface object
     :type simsopt_surface: simsopt.surface
     :return: Matrix of points to model
-    :rtype: np.ndarray
+    :rtype: np.ndarray.
     """
     points = simsopt_surface.gamma()
     points = np.concatenate((points, points[:, :1, :]), axis=1)
-    points = np.concatenate((points, points[:1, :, :]), axis=0)
-
-    return points
+    return np.concatenate((points, points[:1, :, :]), axis=0)
 
 
 def extract_points_from_simsopt_curve(simsopt_curve: Any) -> np.ndarray:
@@ -338,12 +333,10 @@ def extract_points_from_simsopt_curve(simsopt_curve: Any) -> np.ndarray:
     :param simsopt_surface: Simsopt surface object
     :type simsopt_surface: simsopt.surface
     :return: Matrix of points to model
-    :rtype: np.ndarray
+    :rtype: np.ndarray.
     """
     points = simsopt_curve.gamma()
-    points = np.concatenate((points, points[:1, :]), axis=0)
-
-    return points
+    return np.concatenate((points, points[:1, :]), axis=0)
 
 
 def extract_normals(surface, curve_points):
@@ -366,9 +359,7 @@ def extract_normals(surface, curve_points):
     _, indices = tree.query(curve_points)
 
     # Get the normal vectors at the nearest surface points
-    normals = surface.unitnormal().reshape((-1, 3))[indices]
-
-    return normals
+    return surface.unitnormal().reshape((-1, 3))[indices]
 
 
 def surface_to_nurbs(
@@ -423,12 +414,12 @@ def plot_nurbs_curve(curve: NURBS.Curve) -> None:
                 y=evaluated_points[:, 1],
                 z=evaluated_points[:, 2],
                 mode="markers",
-                marker=dict(size=2, color="red"),
+                marker={"size": 2, "color": "red"},
             )
         ]
     )
     fig.update_layout(
-        scene=dict(xaxis_title="X", yaxis_title="Y", zaxis_title="Z"),
+        scene={"xaxis_title": "X", "yaxis_title": "Y", "zaxis_title": "Z"},
         title="NURBS Curve",
     )
     fig.show()
@@ -447,7 +438,7 @@ def curve_to_nurbs(
 
 
 def curves_to_nurbs(
-    curves: List[Any], export_path: str, plot: bool = False
+    curves: list[Any], export_path: str, plot: bool = False
 ) -> None:
     """Convert a list of simsopt curves to NURBS curves and export them as a single JSON file."""
     nurbs_curve_data_list = []
@@ -462,7 +453,7 @@ def curves_to_nurbs(
 
 
 def filament_curves_to_nurbs(
-    curves: List[Any], numfil: int, export_path: str, plot: bool = False
+    curves: list[Any], numfil: int, export_path: str, plot: bool = False
 ) -> None:
     """Convert a list of simsopt curves to NURBS curves and export them as coils in a JSON file."""
     print(curves)

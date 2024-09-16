@@ -67,7 +67,7 @@ def load_coils_from_hdf5(filename):
     coils_data = []
     centers = []
     with h5py.File(filename, "r") as f:
-        for coil_name in f.keys():
+        for coil_name in f:
             group = f[coil_name]
             centre = group["Centre"][:]
             cosine_xyz = group["Cosine_xyz"][:]
@@ -94,7 +94,7 @@ def h5_to_fourier_file_format(h5_filename, output_filename):
     with h5py.File(h5_filename, "r") as f:
         coils_data = []
         max_order = 0
-        for coil_name in f.keys():
+        for coil_name in f:
             group = f[coil_name]
             cosine_xyz = group["Cosine_xyz"][:]
             sine_xyz = group["Sine_xyz"][:]

@@ -2,7 +2,9 @@
 
 """Script to import and optimize the HELIAS 5b coil configuration using SIMSOPT."""
 
+import functools
 import json
+import operator
 import os
 from itertools import starmap
 
@@ -72,7 +74,7 @@ def load_coils_from_hdf5(filename):
     coils_data = []
     centers = []
     with h5py.File(filename, "r") as f:
-        for coil_name in f.keys():
+        for coil_name in f:
             group = f[coil_name]
             centre = group["Centre"][:]
             cosine_xyz = group["Cosine_xyz"][:]
@@ -99,7 +101,7 @@ def h5_to_fourier_file_format(h5_filename, output_filename):
     with h5py.File(h5_filename, "r") as f:
         coils_data = []
         max_order = 0
-        for coil_name in f.keys():
+        for coil_name in f:
             group = f[coil_name]
             cosine_xyz = group["Cosine_xyz"][:]
             sine_xyz = group["Sine_xyz"][:]
@@ -203,8 +205,8 @@ for i, base_curve in enumerate(base_curves):
         rotation_order=rot_order,
     )
     coil_filament_map[coil_name] = filaments
-base_curves_finite_build = sum(coil_filament_map.values(), [])
-base_currents_finite_build = sum([[c] * nfil for c in base_currents], [])
+base_curves_finite_build = functools.reduce(operator.iadd, coil_filament_map.values(), [])
+base_currents_finite_build = functools.reduce(operator.iadd, [[c] * nfil for c in base_currents], [])
 curves_fb = apply_symmetries_to_curves(base_curves_finite_build, s.nfp, True)
 currents_fb = apply_symmetries_to_currents(
     base_currents_finite_build, s.nfp, True
