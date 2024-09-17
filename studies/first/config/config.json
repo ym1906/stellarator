@@ -3,7 +3,7 @@
   "finite": true,
   "Plasma": {
     "designer": {
-      "run_mode": "read",
+      "run_mode": "run",
       "finite_surface_data": "$path_expand:../data/plasma/finite_plasma_surface_nurbs_data.json",
       "surface_data": "$path_expand:../data/plasma/plasma_surface_nurbs_data.json",
       "nphi": 64,
@@ -13,7 +13,7 @@
   },
   "TF Coil": {
     "designer": {
-      "run_mode": "read",
+      "run_mode": "run",
       "finite_coil_data": "$path_expand:../data/coils/finite_magnets_nurbs_data.json",
       "coil_data": "$path_expand:../data/coils/magnets_nurbs_data.json",
       "surface_normals": "$path_expand:../data/coils/normals_data.json",

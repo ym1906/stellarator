@@ -50,7 +50,7 @@ class TFCoilDesignerParams(ParameterFrame):
 
     R_0: Parameter[float]
     R_minor: Parameter[float]
-    n_TF_types: Parameter[int]
+    n_TF_types: Parameter[int]  # noqa: N815
     fourier_modes_cart: Parameter[int]
     fourier_modes_rot: Parameter[int]
     base_current: Parameter[float]
@@ -79,7 +79,7 @@ class TFCoilDesigner(Designer[GeometryParameterisation]):
             f"{'finite_' if self.build_config.get('finite') else ''}coil_data"
         ]
 
-    def run(self) -> GeometryParameterisation:
+    def run(self) -> GeometryParameterisation:  # noqa: PLR0914, PLR0915
         """Run the design of the TF coil."""
         # Create the initial coils
         ncoils = self.params.n_TF_types.value  # Number of unique coil shapes
@@ -108,11 +108,14 @@ class TFCoilDesigner(Designer[GeometryParameterisation]):
         gapsize_b = (
             self.params.fil_gap_b.value
         )  # gap between filaments in bi-normal direction
-        rot_order = self.params.fourier_modes_rot.value  # order of the Fourier expression for the rotation of the filament pack, i.e. maximum Fourier mode number
+        # order of the Fourier expression for the rotation of the filament pack,
+        # i.e. maximum Fourier mode number
+        rot_order = self.params.fourier_modes_rot.value
         nfil = numfilaments_n * numfilaments_b
 
         length_pen = self.build_config["length_penalty"]
-        # Threshhold and weight for the coil-to-coil distance penalty in the objective function:
+        # Threshhold and weight for the coil-to-coil distance penalty in the objective
+        # function:
         dist_min = self.params.min_col_sep.value
         dist_pen = self.build_config["distance_penalty"]
 
@@ -152,12 +155,12 @@ class TFCoilDesigner(Designer[GeometryParameterisation]):
 
         # Define the individual terms of the objective function
         # Define the objective function:
-        Jf = SquaredFlux(self.plasma, bs)
-        Jls = [CurveLength(c) for c in base_curves]
-        Jdist = CurveCurveDistance(curves, dist_min)
+        Jf = SquaredFlux(self.plasma, bs)  # noqa: N806
+        Jls = [CurveLength(c) for c in base_curves]  # noqa: N806
+        Jdist = CurveCurveDistance(curves, dist_min)  # noqa: N806
 
         # Form the total objective function
-        JF = (
+        JF = (  # noqa: N806
             Jf
             + length_pen
             * sum(
@@ -169,10 +172,10 @@ class TFCoilDesigner(Designer[GeometryParameterisation]):
 
         def fun(dofs):
             JF.x = dofs
-            J = JF.J()
+            J = JF.J()  # noqa: N806
             grad = JF.dJ()
             cl_string = ", ".join([f"{J.J():.3f}" for J in Jls])
-            mean_absB = np.mean(bs.AbsB())
+            mean_absB = np.mean(bs.AbsB())  # noqa: N806
             jf = Jf.J()
             kap_string = ", ".join(f"{np.max(c.kappa()):.1f}" for c in base_curves)
             bluemira_print_flush(
@@ -226,5 +229,6 @@ class TFCoilDesigner(Designer[GeometryParameterisation]):
         )
 
     def read(self):
+        """Read coil data from json."""
         # curve_surface_normals_data = read_json(curve_surface_normals)
         return read_json(self.coil_data)

@@ -41,4 +41,5 @@ class PlasmaDesigner(Designer[GeometryParameterisation]):
         ), s
 
     def read(self):
+        """Read surface data from json."""
         return read_json(self.build_config["surface_data"]), None
