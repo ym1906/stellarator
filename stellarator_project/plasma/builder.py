@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from bluemira.base.builder import Builder
 from bluemira.base.components import Component, PhysicalComponent
-from bluemira.codes._freecadapi import fix_shape  # noqa: PLC2701
+import bluemira.codes._geometryapi as cadapi  # noqa: PLC2701
 from bluemira.display.palettes import BLUE_PALETTE
 from bluemira.geometry.face import BluemiraFace
 from bluemira.geometry.shell import BluemiraShell
@@ -56,7 +56,7 @@ class PlasmaBuilder(Builder):
         plasma_surface = BluemiraSolid(BluemiraShell(faces))
 
         if not plasma_surface.is_valid():
-            fix_shape(plasma_surface._shape)  # noqa: SLF001
+            cadapi.fix_shape(plasma_surface._shape)  # noqa: SLF001
 
         component = PhysicalComponent("LCFS", plasma_surface)
         component.display_cad_options.color = BLUE_PALETTE["PL"]
